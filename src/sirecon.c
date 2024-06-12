@@ -363,6 +363,7 @@ int main(int argc, char **argv)
   nthreads = sysconf(_SC_NPROCESSORS_CONF); /* Get number of processors */
 #endif
 #endif
+  nthreads = 1;
   omp_set_num_threads(nthreads);
   printf("Number of threads used: %d\n", nthreads);
 
