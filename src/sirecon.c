@@ -34,20 +34,28 @@ using namespace cimg_library;
 #include <unistd.h> // for sysconf()
 #endif
 
+
 // for IMLIB with vs >2015
 // https://stackoverflow.com/questions/30412951/unresolved-external-symbol-imp-fprintf-and-imp-iob-func-sdl2
 #include <stdio.h>
 
 static FILE* temp[3];
+static pthread_mutex_t temp_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 void init_iob() {
+    pthread_mutex_lock(&temp_mutex);
     temp[0] = stdin;
     temp[1] = stdout;
     temp[2] = stderr;
+    pthread_mutex_unlock(&temp_mutex);
 }
 
 FILE** __imp___iob_func() {
-    return temp;
+    FILE** temp_copy;
+    pthread_mutex_lock(&temp_mutex);
+    temp_copy = temp;
+    pthread_mutex_unlock(&temp_mutex);
+    return temp_copy;
 }
 
 int nthreads;  /* for multithreaded FFTW */
