@@ -68,7 +68,7 @@ float * boundaryAngles=NULL;
 
 int main(int argc, char **argv)
 {
-  char ifiles[200], ofiles[200], otffiles[200];
+  char ifiles[300], ofiles[300], otffiles[300];
   int nx, ny, nz, nz0, zoffset, nxy, z, norders, nordersIn, order;
   int nphases, ndirs, sizeOTF;
   float *buffer;
