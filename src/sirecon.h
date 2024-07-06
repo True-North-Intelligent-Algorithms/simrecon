@@ -92,6 +92,9 @@ typedef struct {
   char  fileRawAligned[200];
   int   bSaveOverlaps; /* whether to save makeoverlaps() output into a file */
   char  fileOverlaps[200];
+
+  /* performance related parameters */
+  int  nthreads;  /* number of threads to use */
 } ReconParams;
 
 typedef struct{

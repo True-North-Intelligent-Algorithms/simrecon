@@ -26,7 +26,7 @@ import mrc as Mrc
 
 from collections import OrderedDict, Sequence
 # import skimage components
-from peaks.peakfinder import PeakFinder
+#from peaks.peakfinder import PeakFinder
 
 from dphutils import (slice_maker, scale_uint16, fft_pad,
                       radial_profile)
@@ -858,7 +858,7 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
 
     # the list to pass to subprocess.call, this is just the beginning
     # execute in powershell
-    exc_list = [r'C:\SIMrecon_svn\sirecon', input_file, output_file, otf_file]
+    exc_list = [r'C:\Users\bnort\work\Janelia\code\simrecon\build\sirecon', input_file, output_file, otf_file]
     
     # insert default values into **kwargs here
     valid_kwargs = OrderedDict.fromkeys((
@@ -909,7 +909,8 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'nimm',
         'saveprefiltered',
         'savealignedraw',
-        'saveoverlaps'
+        'saveoverlaps',
+        'nthreads'
     ))
     numeric = (int, float)
     valid_kwargs.update({
@@ -961,7 +962,8 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'nimm': float,
         'saveprefiltered': 'path',
         'savealignedraw': 'path',
-        'saveoverlaps': 'path'
+        'saveoverlaps': 'path',
+        'nthreads': int
     })
 
     # update kwargs with those passed by user and generate the list.
@@ -1422,7 +1424,7 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
     if bg_estimate:
         bgs = {}
     # make temp directory to work in
-    with tempfile.TemporaryDirectory(dir="F:/") as dir_name:
+    with tempfile.TemporaryDirectory(dir="D:/") as dir_name:
         # save split data
         sirecon_ouput = []
         
