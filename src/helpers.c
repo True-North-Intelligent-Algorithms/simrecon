@@ -463,6 +463,13 @@ int commandline(int argc, char *argv[], ReconParams *myParams, char *ifiles, cha
       strcpy(myParams->fileOverlaps, argv[ncomm+1]);
       ncomm += 2;
     }
+    else if (strcmp(argv[ncomm], "-nthreads") == 0) {
+      if (!getinteger(argv[ncomm+1], &myParams->nthreads)) {
+        printf("Invalid input for switch -nthreads\n");
+        return 0;
+      }
+      ncomm += 2;
+    }
 /*     else if (strcmp(argv[ncomm], "-skip") == 0) { */
 /*       if (!getinteger(argv[ncomm+1], skip_sec)) { */
 /*         printf("Invalid input for switch -skip\n"); */
@@ -569,6 +576,8 @@ void SetDefaultParams(ReconParams *pParams)
   pParams->fileRawAligned[0] = '\0';
   pParams->bSaveOverlaps = 0;
   pParams->fileOverlaps[0] = '\0';
+
+  pParams->nthreads = -1;
 }
 
 void mrc_file_write(const float *buffer, int nx, int ny, int nz, float rlen, float zlen, int mode, int iwave, const char *files)

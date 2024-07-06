@@ -351,7 +351,7 @@ int main(int argc, char **argv)
     }
   backgroundExtra = 0;
 
-
+if (myParams.nthreads == -1) {
 #ifndef NDEBUG
   nthreads = 1;
 #else
@@ -363,7 +363,10 @@ int main(int argc, char **argv)
   nthreads = sysconf(_SC_NPROCESSORS_CONF); /* Get number of processors */
 #endif
 #endif
-  nthreads = 1;
+} 
+else {
+  nthreads = myParams.nthreads;
+}
   omp_set_num_threads(nthreads);
   printf("Number of threads used: %d\n", nthreads);
 
@@ -967,6 +970,7 @@ int main(int argc, char **argv)
       }
 
       for (direction=0; direction<ndirs; direction++) {
+        printf("\n");
         printf("for direction %d, do filterbands() and assemblerealspace()\n", direction);
 
         bands=savedbands[direction];
