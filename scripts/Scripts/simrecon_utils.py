@@ -842,6 +842,10 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         save drift-corrected raw images into file
     saveoverlaps: path
         save overlaps by makeoverlaps() into file
+    nthreads: int
+        number of low level threads to use in c-code
+    makemodel: bool
+          use the OTF to simulate an ideal point source 
     '''
 
     # make sure the paths are absolute paths
@@ -910,7 +914,8 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'saveprefiltered',
         'savealignedraw',
         'saveoverlaps',
-        'nthreads'
+        'nthreads',
+        'makemodel'
     ))
     numeric = (int, float)
     valid_kwargs.update({
@@ -963,7 +968,8 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'saveprefiltered': 'path',
         'savealignedraw': 'path',
         'saveoverlaps': 'path',
-        'nthreads': int
+        'nthreads': int,
+        'makemodel': bool
     })
 
     # update kwargs with those passed by user and generate the list.
