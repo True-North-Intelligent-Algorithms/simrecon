@@ -867,7 +867,20 @@ else {
             printf("modamp mag=%f, phase=%f\n",cabsf(amp[direction][order]), cargf(amp[direction][order]));
             printf("reverse modamp mag=%f, phase=%f\n", 1/cabsf(amp_inv), -cargf(amp_inv));
             printf("combined modamp mag=%f, phase=%f\n", cabsf(amp_combo), cargf(amp_combo));
-			printf("correlation coeff=%f\n\n", corr_coeff);
+			      printf("correlation coeff=%f\n\n", corr_coeff);
+
+            /*
+            vector temp;
+            temp.x = 0.3308568;
+            temp.y = 1.54700875;
+            float corr_coeff2 = findrealspacemodamp(bands, overlap0, overlap1, nx, ny, nz0, 0, 2, temp, dxy, dz,
+                                             otf, wave[iw], &amp[direction][order], &amp_inv, &amp_combo, 1, &myParams);
+            printf("modamp mag=%f, phase=%f\n",cabsf(amp[direction][order]), cargf(amp[direction][order]));
+            printf("reverse modamp mag=%f, phase=%f\n", 1/cabsf(amp_inv), -cargf(amp_inv));
+            printf("combined modamp mag=%f, phase=%f\n", cabsf(amp_combo), cargf(amp_combo));
+			      printf("correlation coeff=%f\n\n", corr_coeff);
+            */
+            
             if (order==1 && myParams.bSaveOverlaps) // output the overlaps
               for (z=0; z<nz0; z++) {
                 IMWrSec(overlaps_stream_no, overlap0+z*nx*ny);
