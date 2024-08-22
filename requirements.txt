@@ -1,0 +1,13 @@
+ipykernel
+numpy==1.24
+matplotlib
+tifffile
+scipy
+requests
+tqdm
+dask
+mrc
+scikit-image
+dphtools
+seaborn
+tnia-python
