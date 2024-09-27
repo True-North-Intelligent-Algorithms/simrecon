@@ -1,6 +1,8 @@
 .vscode/
 build/
 cmake_build/
+test_data/
+src/experimental/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
