@@ -492,8 +492,12 @@ def fftconvolve_fast(data, kernel, **kwargs):
     # return data with same shape as original data
     return convolve_data[fslice]
 
+try:
+    from scipy.signal import hann
+except ImportError:
+    from scipy.signal.windows import hann
 
-def win_nd(size, win_func=sp.signal.hann, **kwargs):
+def win_nd(size, win_func=hann, **kwargs):
     """
     A function to make a multidimensional version of a window function
 
