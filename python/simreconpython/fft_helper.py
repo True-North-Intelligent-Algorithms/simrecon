@@ -3,8 +3,7 @@ from tnia.plotting.projections import show_xyz_slice_center
 
 def centered_fft_magnitude(im, log):
     """Compute the magnitude of the FFT of an image, centered around the
-    origin.  The image is padded with zeros to the next power of 2 in each
-    dimension.  The magnitude is returned as a 2D array.
+    origin.   The magnitude is returned as a 2D array.
 
     Parameters
     ----------
@@ -27,8 +26,7 @@ def centered_fft_magnitude(im, log):
 
 def show_centered_fft_magnitude(im, log=True):
     """Compute and display the magnitude of the FFT of an image, centered
-    around the origin.  The image is padded with zeros to the next power of 2
-    in each dimension.  The magnitude is displayed as a 2D array.
+    around the origin. The magnitude is displayed as a 2D array.
 
     Parameters
     ----------
