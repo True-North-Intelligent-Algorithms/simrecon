@@ -52,11 +52,11 @@ def apodize_z(image, napodize):
         for l in range(ny):
             diff = (image[nz-1, l, k] - image[0, l, k])/2
             for m in range(napodize):
-                fact = 1- (napodize - m) / napodize
+                delta = 0.01
+                fact = (1- (napodize - m) / napodize)+delta
                 image_out[m, l, k] = fact * image[m, l, k]
                 image_out[nz-1-m, l, k] = fact * image[nz-1-m, l, k]
     return image_out  # Optionally return the modified image as a flat array
-
 
 def apodize_3d(image, napodize):
     temp = image.copy().astype('float32')
