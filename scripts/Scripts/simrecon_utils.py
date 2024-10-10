@@ -10,6 +10,7 @@ Copyright (c) 2016, David Hoffman
 import os
 import glob
 import re
+from tkinter import font
 import tqdm
 import numpy as np
 import matplotlib.pyplot as plt
@@ -1569,7 +1570,7 @@ def process_txt_output(txt_buffer):
     return parse_dict
 
 
-def plot_params(data_dict):
+def plot_params(data_dict, dpi=150, axes_pad=0.1, figsize=(9,15), cbar_size="5%", cbar_pad="2%", fontsize=8):
     """Plot tiled SIM parameters
     Angle, magnitude (spatial frequency in inverse microns), phase, modulation amplitude
     First three define a wavevector
@@ -1585,14 +1586,16 @@ def plot_params(data_dict):
     # set up figure
     norients = len(data_dict["angle"])
     nparams = len(mapping)
-    fig = plt.figure(dpi=150, figsize=(norients * 3, nparams * 3))
+    fig = plt.figure(dpi=dpi, figsize=figsize)
     grid = ImageGrid(
         fig,
         111, 
         nrows_ncols=(nparams, norients),
-        axes_pad=0.1,
+        axes_pad=axes_pad,
         cbar_mode="edge",
         cbar_location="left",
+        cbar_size=cbar_size,
+        cbar_pad=cbar_pad,
     )
 
     keys = ("angle", "phase", "mag", "amp", "ccoef")
@@ -1621,13 +1624,15 @@ def plot_params(data_dict):
             ax.yaxis.set_major_locator(plt.NullLocator())
             if key == "angle":
                 ax.set_title("{:.1f} Degrees".format(np.rad2deg(np.median(d))))
+            ax.set_ylabel(mapping[key], fontsize=fontsize)
         
         cbar.colorbar(im)
-        cbar.set_ylabel(mapping[key])
+        #cbar.set_ylabel(mapping[key])
+        #grid[0].set_ylabel(mapping[key])
         
         if "angle" == key:
             cbar.remove()
-            grid[0].set_ylabel(mapping[key])
+            #grid[0].set_ylabel(mapping[key])
     
     return fig, grid
 
