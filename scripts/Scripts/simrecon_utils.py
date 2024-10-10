@@ -24,8 +24,13 @@ import dask
 from dask.diagnostics import ProgressBar
 # import our ability to read and write MRC files
 import mrc as Mrc
+import math
 
-from collections import OrderedDict, Sequence
+from collections import OrderedDict
+try:
+    from collection import Sequence
+except ImportError:
+    from collections.abc import Sequence
 # import skimage components
 #from peaks.peakfinder import PeakFinder
 
