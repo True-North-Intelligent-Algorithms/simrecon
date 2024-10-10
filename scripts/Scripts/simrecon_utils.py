@@ -769,6 +769,9 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
     k0angles: sequence of floats (f0 f1... f_(ndirs-1))
         user supplied pattern angle list, the -ndirs flag must be used BEFORE
         the -k0angles flag
+    k0spacings: sequence of floats (f0 f1... f_(ndirs-1))
+        user supplied spacings list, the -ndirs flag must be used BEFORE
+        the -k0spacings flag
     fitonephase: bool
         in 2D NLSIM for orders > 1, modamp's phase will be order 1 phase
         multiplied by order; default is using fitted phases for all orders
@@ -882,10 +885,13 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'nordersout',
         'forcemodamp',
         'otfamp',
+        'ampmin',
+        'ampmax',
         'nok0search',
         'nokz0',
         'k0searchAll',
         'k0angles',
+        'k0spacings',
         'fitonephase',
         'noapodizeout',
         'gammaApo',
@@ -936,10 +942,13 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'inputapo': int,
         'forcemodamp': Sequence,
         'otfamp': Sequence,
+        'ampmin': Sequence,
+        'ampmax': Sequence,
         'nok0search': bool,
         'nokz0': bool,
         'k0searchAll': bool,
         'k0angles': Sequence,
+        'k0spacings': Sequence,
         'fitonephase': bool,
         'noapodizeout': bool,
         'gammaApo': float,
@@ -980,32 +989,36 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'makemodel': bool
     })
 
-    # update kwargs with those passed by user and generate the list.
-    for k, kw_type in valid_kwargs.items():
-        try:
-            kw_value = kwargs[k]
-        except KeyError:
-            # user didn't pass this one, so skip
-            pass
-        else:
-            # test validity
-            if kw_type == 'path':
+    def generate_exc_list(kwargs):
+        # update kwargs with those passed by user and generate the list.
+        for k, kw_type in valid_kwargs.items():
+            try:
+                kw_value = kwargs[k]
+            except KeyError:
+                # user didn't pass this one, so skip
                 pass
             else:
-                assert isinstance(kw_value, kw_type), '{} is type {} and should have been type {}'.format(k, type(kw_value), repr(kw_type))
-            if kw_type is not bool:
-                exc_list.append('-' + k)
-                # exc_list.append('-' + k)
-                if isinstance(kw_value, Sequence) and not isinstance(kw_value, str):
-                    for v in kw_value:
-                        exc_list.append(formatter(v))
+                # test validity
+                if kw_type == 'path':
+                    pass
                 else:
-                    exc_list.append(formatter(kw_value))
-            else:
-                # in this case the key word is a bool
-                # test if bool is true
-                if kw_value:
+                    assert isinstance(kw_value, kw_type), '{} is type {} and should have been type {}'.format(k, type(kw_value), repr(kw_type))
+                if kw_type is not bool:
                     exc_list.append('-' + k)
+                    # exc_list.append('-' + k)
+                    if isinstance(kw_value, Sequence) and not isinstance(kw_value, str):
+                        for v in kw_value:
+                            exc_list.append(formatter(v))
+                    else:
+                        exc_list.append(formatter(kw_value))
+                else:
+                    # in this case the key word is a bool
+                    # test if bool is true
+                    if kw_value:
+                        exc_list.append('-' + k)
+        return exc_list
+
+    exc_list = generate_exc_list(kwargs)
 
     # save the output
     return_code = subprocess.run(
@@ -1019,7 +1032,99 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         logger.error(" ".join(exc_list))
     else:
         logger.debug(" ".join(exc_list))
-    return return_code.stdout.decode('utf-8').split('\n')
+
+    output_list = return_code.stdout.decode('utf-8').split('\n')
+    
+    tile_limits = kwargs.get('tile_limits', None)
+
+    if tile_limits is not None:    
+        temp = [line for line in output_list if line.strip()]
+    
+        for i in range(len(temp)):
+            temp[i] = temp[i].replace('\r', '')
+        
+    
+        temp1="\n".join(temp)
+        tile_data = process_txt_output(temp1)
+
+        spacing_min = tile_limits['spacing_min']
+        spacing_max = tile_limits['spacing_max']
+        angle_min = tile_limits['angle_min']
+        angle_max = tile_limits['angle_max']
+        amp1_min = tile_limits['amp1_min']
+        amp1_max = tile_limits['amp1_max']
+        amp2_min = tile_limits['amp2_min']
+        amp2_max = tile_limits['amp2_max']
+
+        # first get the magnitude data which should be ndirs by xsize by ysize
+        # calculate xsize*yxize so we know how to index into the array
+        mags=[tile_data['mag'][i][0,0].astype(float) for i in range(3)]
+        angles = [tile_data['angle'][i][0,0].astype(float) for i in range(3)]   
+        
+        spacings = [1/m/2 for m in mags]
+
+        for i in range(len(angles)):
+            
+            angle_ = angles[i]+i*math.pi/3
+            
+            if (angle_ < angle_min):
+                angles[i]=angle_min-i*math.pi/3
+                reprocess = True
+            elif (angle_ > angle_max):
+                angles[i] = angle_max-i*math.pi/3
+                reprocess = True
+
+        for i in range(len(spacings)):
+            if (spacings[i] < spacing_min):
+                spacings[i] = spacing_min
+                reprocess = True
+            elif (spacings[i] > spacing_max):
+                spacings[i] = spacing_max
+                reprocess = True
+
+        try:
+            ampsorder2 = [tile_data['amp'][i][0,0].astype(float) for i in range(3)]
+        except:
+            ampsorder2 = [1.0, 1.0, 1.0]
+            reprocess = True
+
+        try:
+            ampsorder1 = [tile_data['amp'][i][0,1].astype(float) for i in range(3)]
+        except:
+            ampsorder1 = [1.0, 1.0, 1.0]
+            reprocess = True
+
+        if min(ampsorder1)<amp1_min:
+            reprocess = True
+        elif max(ampsorder1)>amp1_max:
+            reprocess = True
+
+        if min(ampsorder2)<amp2_min:
+            reprocess = True
+        elif max(ampsorder2)>amp2_max:
+            reprocess = True
+
+        if reprocess:
+            #kwargs.update({'ls': line_spacing_to_use, 'angle0': angle_to_use, 'forcemodamp': [amp1_to_use, amp2_to_use], 'nok0search': True})   
+            kwargs.update({'k0spacings': spacings, 'k0angles': angles, 'ampmin': [amp1_min, amp2_min], 'ampmax': [amp1_max, amp2_max],'nok0search': True})   
+            
+            exc_list = generate_exc_list(kwargs)
+
+            # save the output
+            return_code = subprocess.run(
+                exc_list,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            if return_code.stderr:
+                logger.error(return_code.stderr.decode())
+                logger.error(" ".join(exc_list))
+            else:
+                logger.debug(" ".join(exc_list))
+
+            output_list = return_code.stdout.decode('utf-8').split('\n')
+    return output_list
 
 
 def formatter(value):
@@ -1218,6 +1323,7 @@ def split_img_with_padding(img, side, pad_width, mode='reflect'):
                             i * side:pad_width + (i + 1) * side]
                         for j in tqdm.tnrange(ny // side)
                         for i in range(nx // side)]
+    
     # return this
     return split_pad_img
 
@@ -1407,7 +1513,7 @@ def combine_img_with_padding_window(recon_split_data, padding, window_func=cosin
     return to_combine_data[..., slc, slc]
 
 
-def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimate=None, window_func=cosine_edge):
+def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimate=None, window_func=cosine_edge, tile_data = None, tile_limits = None):
     '''
     Method that splits then processes and then recombines images
 
@@ -1437,6 +1543,10 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
     # estimate background
     if bg_estimate:
         bgs = {}
+
+    # comment in below line to use single threaded scheduler (mostly used to make stepwise debugging easier)
+    #dask.config.set(scheduler='single-threaded')
+
     # make temp directory to work in
     with tempfile.TemporaryDirectory(dir="D:/") as dir_name:
         # save split data
@@ -1462,7 +1572,8 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
             # update the kwargs to have the input file.
             sim_kwargs.update({
                 'input_file': savepath,
-                'output_file': savepath.replace('.mrc', '_proc.mrc')
+                'output_file': savepath.replace('.mrc', '_proc.mrc'),
+                'tile_limits': tile_limits
             })
             if bg_estimate:
                 sim_kwargs['background'] = float(bgs[i])
@@ -1554,6 +1665,7 @@ def process_txt_output(txt_buffer):
         angle=r'(?:amplitude:\n In.*)(?<=angle=)(-?\d+\.\d+)',
         mag=r'(?:amplitude:\n In.*)(?<=mag=)(-?\d+\.\d+)',
         amp=r'(?:amplitude:\n In.*)(?<=amp=)(-?\d+\.\d+)',
+        amp2=r'(?:otherorder:\n In.*)(?<=amp=)(-?\d+\.\d+|-?nan\(ind\))',
         phase=r'(?:amplitude:\n In.*)(?<=phase=)(-?\d+\.\d+)',
         ramp=r'(?:amplitude:\n In.*\n Reverse.*)(?<=amp=)(-?\d+\.\d+)',
         camp=r'(?:amplitude:\n In.*\n.*\n Combined.*)(?<=amp=)(-?\d+\.\d+)',
@@ -1561,7 +1673,9 @@ def process_txt_output(txt_buffer):
     )
     re_dict = {k: re.compile(v, flags=re.M) for k, v in re_dict.items()}
     # parse output
-    parse_dict = {k: np.array(re.findall(v, txt_buffer)).astype(float) for k, v in re_dict.items()}
+
+    parse_dict = {k: np.array(re.findall(v, txt_buffer)) for k, v in re_dict.items()}
+    #parse_dict = {k: np.array(re.findall(v, txt_buffer)).astype(float) for k, v in re_dict.items()}
     shapes = set(map(np.shape, parse_dict.values()))
     # find sizes
     assert len(shapes) == 1
