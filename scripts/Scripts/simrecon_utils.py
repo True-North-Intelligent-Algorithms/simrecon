@@ -1653,7 +1653,7 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
     return total_save_path, sirecon_ouput
 
 
-def process_txt_output(txt_buffer):
+def process_txt_output(txt_buffer, find_amp2=False):
     """Take output from above and parse into angles"""
     # ndirs is special
     ndir_re = re.compile(r'(?<=ndirs=)\d+', flags=re.M)
@@ -1665,12 +1665,15 @@ def process_txt_output(txt_buffer):
         angle=r'(?:amplitude:\n In.*)(?<=angle=)(-?\d+\.\d+)',
         mag=r'(?:amplitude:\n In.*)(?<=mag=)(-?\d+\.\d+)',
         amp=r'(?:amplitude:\n In.*)(?<=amp=)(-?\d+\.\d+)',
-        amp2=r'(?:otherorder:\n In.*)(?<=amp=)(-?\d+\.\d+|-?nan\(ind\))',
         phase=r'(?:amplitude:\n In.*)(?<=phase=)(-?\d+\.\d+)',
         ramp=r'(?:amplitude:\n In.*\n Reverse.*)(?<=amp=)(-?\d+\.\d+)',
         camp=r'(?:amplitude:\n In.*\n.*\n Combined.*)(?<=amp=)(-?\d+\.\d+)',
         ccoef=r'(?:amplitude:\n In.*\n.*\n.*\n Correlation.*)(-?\d+\.\d+)'
     )
+    # Conditionally add amp2 entry if find_amp2 is True
+    if find_amp2:
+        re_dict['amp2'] = r'(?:otherorder:\n In.*)(?<=amp=)(-?\d+\.\d+|-?nan\(ind\))'
+    
     re_dict = {k: re.compile(v, flags=re.M) for k, v in re_dict.items()}
     # parse output
 
