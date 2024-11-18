@@ -33,7 +33,10 @@ typedef struct {
   int   recalcarrays; /* whether to calculate the overlaping regions between bands just once or always; used in fitk0andmodamps() */
   int   napodize;
   float forceamp[MAXPHASES];
+  float ampmin[MAXPHASES];
+  float ampmax[MAXPHASES];
   float *k0angles;
+  float *k0spacings;
   int   bSearchforvector;
   int   bUseTime0k0;   /* whether to use time 0's k0 fit for the rest of a time series */
   int   apodizeoutput;  /* 0-no apodize; 1-cosine apodize; 2-triangle apodize; used in filterbands() */

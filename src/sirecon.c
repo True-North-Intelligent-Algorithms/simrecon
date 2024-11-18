@@ -438,6 +438,12 @@ else {
     else
       k0angleguess = myParams.k0angles[i];
 
+    // if initial guess for all spacings has been passed in then use it
+    if (myParams.k0spacings != 0) {
+      k0magguess = 1.0/myParams.k0spacings[i];
+      k0magguess /= nordersIn -1; // convert k0mag into the k0mag corresponding to the lowest excitation harmonic
+    }
+
     // k0guess is in 1/micron
     k0guess[i].x = k0magguess * cos(k0angleguess);
     k0guess[i].y = k0magguess * sin(k0angleguess);
@@ -884,8 +890,41 @@ else {
         if (myParams.forceamp[1] > 0.0)   /* force modamp's amplitude to be a value user provided (ideally should be 1)  */
           for (order=1;order<norders;order++) {
             float a = cabsf(amp[direction][order]);
-            if (a<myParams.forceamp[order]) {
+            // BN commenting out this if statement to allow higher a factors
+            //if (a<myParams.forceamp[order]) {
               ampfact = myParams.forceamp[order]/a;
+              amp[direction][order] *= ampfact;
+              printf("modamp mag=%f, phase=%f  \n",cabsf(amp[direction][order]),
+                     cargf(amp[direction][order]));
+            //}
+          }
+
+        // BN: Here we constrain amp to be between ampmin and ampmax, and check if amp is nan or infinite
+        // (this is helpful as a constraint for tiled reconstructions where sometimes a tile has an unrealistic amp)
+        if (myParams.ampmin[1] > 0.0)   /* force modamp's amplitude to be above ampmin  */
+          for (order=1;order<norders;order++) {
+            float a = cabsf(amp[direction][order]);
+
+            if ( isnan(a) || !isfinite(a)) {
+              amp[direction][order] = 1.0 + 0*I;
+            }
+            else if (a<myParams.ampmin[order]) {
+              ampfact = myParams.ampmin[order]/a;
+              amp[direction][order] *= ampfact;
+              printf("modamp mag=%f, phase=%f  \n",cabsf(amp[direction][order]),
+                     cargf(amp[direction][order]));
+            }
+          }
+
+        if (myParams.ampmax[1] > 0.0)   /* force modamp's amplitude to be below ampmax  */
+          for (order=1;order<norders;order++) {
+            float a = cabsf(amp[direction][order]);
+
+            if ( isnan(a) || !isfinite(a)) {
+              amp[direction][order] = 1.0 + 0*I;
+            }
+            else if (a>myParams.ampmax[order]) {
+              ampfact = myParams.ampmax[order]/a;
               amp[direction][order] *= ampfact;
               printf("modamp mag=%f, phase=%f  \n",cabsf(amp[direction][order]),
                      cargf(amp[direction][order]));
@@ -1734,6 +1773,8 @@ void fitk0andmodamps(fftwf_complex *bands[], fftwf_complex *overlap0, fftwf_comp
   else /* 3D */
     for (order=1; order<norders; order++)
       if (order!=fitorder2) {
+        // we need to print out an extra message with 'otherorder' at the end so that the python wrapper can parse the higher order amp
+        printf("Optimum modulation amplitude for order %d otherorder:\n", order);
         getmodamp(angle, mag, bands, overlap0, overlap1, nx, ny, nz, 0, order, dxy, dz, otf, wave, &modamp, redoarrays, pParams, 1);
         amps[order] = modamp;
       }
@@ -2154,6 +2195,7 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
 
         x1f = x1 * dkx;
         y1f = y1 * dky;
+
         rdist1 = sqrt(x1f*x1f+y1f*y1f);  /* dist from center of band to be filtered */
         if (rdist1<=rdistcutoff) {   /* is x1,y1 within the theoretical lateral OTF support of the data that is to be scaled? */
           xabs = x1f + kx;   /* coords (in 1/micron) relative to absolute Fourier space, with */
@@ -2162,8 +2204,11 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
           for (z0=-zdistcutoff[order];z0<=zdistcutoff[order];z0++) {
             otf1 = otfinterpolate(OTF[order], x1f, y1f, z0, kzscale, pParams);
             weight = mag2(otf1);
+
             if (order!= 0) weight *= ampmag2[order];
+
             dampfact = 1. / noiseVarFactors[dir*norders+order];
+           
             if (pParams->bSuppress_singularities && order != 0 && rdist1 <= suppRadius)
               dampfact *= suppress(rdist1, suppRadius);
 
@@ -2176,9 +2221,10 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
 
             else if (pParams->bNoOrder0 && order ==0)
               dampfact = 0.;
-
+            
             // if no kz=0 plane is used:
             if (order==0 && z0==0 && pParams->bNoKz0) dampfact = 0;
+            
 
             weight *= dampfact;
             sumweight=weight;
@@ -2193,25 +2239,23 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
                 x2 = xabs-kx2; /* coords rel to shifted center of band 2 */
                 y2 = yabs-ky2;
                 rdist2 = sqrt(x2*x2 + y2*y2);       /* dist from center of band 2 */
+
                 if (rdist2<rdistcutoff) {
                   otf2 = otfinterpolate(OTF[abs(order2)], x2, y2, z0, kzscale, pParams);
                   weight = mag2(otf2) / noiseVarFactors[dir2*norders+abs(order2)];
                   if (order2 != 0) weight *= amp2mag2;
-
+                  
                   if (pParams->bSuppress_singularities && order2 != 0 && rdist2 <= suppRadius)
                     weight *= suppress(rdist2, suppRadius);
-
                   else if (!pParams->bDampenOrder0 && !pParams->bNoOrder0 && pParams->bSuppress_singularities
                            && order2 ==0 && rdist2 <= suppRadius)
                     weight *= suppress(rdist2, suppRadius);
-                    
                   else if (pParams->bDampenOrder0 && order2 ==0)
                     weight *= order0damping(rdist2, z0, rdistcutoff, zdistcutoff[0]);
                   else if (pParams->bNoOrder0 && order2 ==0)
                     weight = 0.;
 
                   if (pParams->bNoKz0 && order2==0 && z0==0) weight = 0;
-
                   sumweight += weight;
                   
                 }

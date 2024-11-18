@@ -82,6 +82,7 @@ void Usage(char *argv[])
   printf("\t-nokz0 -- do not use kz0 plane in makeoverlaps() or assembly (for bad \n");
   printf("-k0searchAll -- search for k0 for every time point in a time series\n");
   printf("\t-k0angles f0 f1... f_(ndirs-1) -- user supplied pattern angle list, the -ndirs flag must be used BEFORE the -k0angles flag\n");
+  printf("\t-k0spacingsf0 f1... f_(ndirs-1) -- user supplied spacings list, the -ndirs flag must be used BEFORE the -k0spacings flag\n");
   printf("\t-fitonephase -- in 2D NLSIM for orders > 1, modamp's phase will be order 1 phase multiplied by order; default is using fitted phases for all orders\n");
   printf("\t-noapodizeout -- do not want to apodize the output data\n");
   printf("\t-gammaApo -- apodize the output data with a power function\n");
@@ -282,10 +283,44 @@ int commandline(int argc, char *argv[], ReconParams *myParams, char *ifiles, cha
         }
       ncomm += norders;
     }
+   else if (strcmp(argv[ncomm], "-ampmin") == 0) {
+      int norders;
+      if (myParams->norders_output>1)
+        norders = myParams->norders_output;
+      else
+        norders = myParams->nphases/2+1;
+
+      if (!getfloats(argv+ncomm+1, myParams->ampmin+1, norders-1)) {
+        printf("Invalid input for switch -ampmin\n");
+        return 0;
+      }
+      ncomm += norders;
+    }
+   else if (strcmp(argv[ncomm], "-ampmax") == 0) {
+      int norders;
+      if (myParams->norders_output>1)
+        norders = myParams->norders_output;
+      else
+        norders = myParams->nphases/2+1;
+
+      if (!getfloats(argv+ncomm+1, myParams->ampmax+1, norders-1)) {
+        printf("Invalid input for switch -ampmax\n");
+        return 0;
+      }
+      ncomm += norders;
+    }
     else if (strcmp(argv[ncomm], "-k0angles") ==0 ) {
       myParams->k0angles = malloc(myParams->ndirs * sizeof(float));
       if (!getfloats(argv+ncomm+1, myParams->k0angles, myParams->ndirs)) {
         printf("Invalid input for switch -k0angles\n");
+        return 0;
+      }
+      ncomm += myParams->ndirs+1;
+    }
+    else if (strcmp(argv[ncomm], "-k0spacings") ==0 ) {
+      myParams->k0spacings = malloc(myParams->ndirs * sizeof(float));
+      if (!getfloats(argv+ncomm+1, myParams->k0spacings, myParams->ndirs)) {
+        printf("Invalid input for switch -k0spacings\n");
         return 0;
       }
       ncomm += myParams->ndirs+1;
@@ -470,6 +505,7 @@ int commandline(int argc, char *argv[], ReconParams *myParams, char *ifiles, cha
       }
       ncomm += 2;
     }
+
 /*     else if (strcmp(argv[ncomm], "-skip") == 0) { */
 /*       if (!getinteger(argv[ncomm+1], skip_sec)) { */
 /*         printf("Invalid input for switch -skip\n"); */
@@ -531,7 +567,10 @@ void SetDefaultParams(ReconParams *pParams)
   pParams->recalcarrays = 1; /* whether to calculate the overlaping regions between bands just once or always; used in fitk0andmodamps() */
   pParams->napodize = 10;
   pParams->forceamp[1] = 0.0;
+  pParams->ampmin[1]=0.0;
+  pParams->ampmax[1]=0.0;
   pParams->k0angles = NULL;
+  pParams->k0spacings = NULL;
   pParams->bSearchforvector = 1;
   pParams->bUseTime0k0 = 1;  /* default to use time 0's k0 fit for the rest in a time series data */
   pParams->apodizeoutput = 1;  /* 0-no apodize; 1-cosine apodize; 2-triangle apodize; used in filterbands() */
