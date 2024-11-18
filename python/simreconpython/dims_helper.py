@@ -20,8 +20,33 @@ def reshape_zdpyx_dpzyx(raw, nphases=5, ndirections=3):
     for d in range(ndirections):
         for p in range(nphases):
             n = d * nphases + p
-            blob = raw[n::15, :, :]
+            blob = raw[n::nphases*ndirections, :, :]
             images[d, p, :, :, :] = blob
+
+    return images
+
+def reshape_zdpyx_dzpyx(raw, nphases=5, ndirections=3):
+    """
+    Reshape z-dir-phase-y-x (fastest changing index to slowest) data into 
+    dir-z-y-x (fastest changing index to slowest) data.
+
+    Parameters:
+    raw (np.ndarray): The raw input data array.
+    nphases (int): Number of phases. Default is 5.
+    ndirections (int): Number of directions. Default is 3.
+
+    Returns:
+    np.ndarray: Reshaped 4D array with dimensions (ndirections, nz, height, width).
+    """
+
+    nz = raw.shape[0] // (nphases * ndirections)
+    images = np.zeros((ndirections, nz, nphases, raw.shape[1], raw.shape[2]))
+    
+    for d in range(3):
+        for z in range(nz):
+            n=d*nphases+z*ndirections*nphases
+            blob = raw[n:n+nphases,:,:]
+            images[d,z,:,:,:] = blob
 
     return images
 
