@@ -2,7 +2,7 @@
 
 The build uses CMake. The CMake file is [here](../src/CMakeLists.txt).  
 
-The recommended way to start the build is from Visual Studio Code. For convenience, I have added the `.vscode` files to the GitHub repo. The directory locations need to be changed for local computers.
+The recommended way to start the build is from Visual Studio Code. For convenience, I have added the [.vscode](../.vscode) files to the GitHub repo. The directory locations need to be changed for local computers.
 
 You will need to install the CMake and C/C++ extension. 
 
