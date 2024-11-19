@@ -1,4 +1,3 @@
-.vscode/
 build/
 cmake_build/
 test_data/
