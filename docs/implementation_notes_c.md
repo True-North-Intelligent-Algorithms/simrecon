@@ -18,13 +18,17 @@
 
 All processing code is in a single file simrecon.c.
 
-Main simrecon routine starts at line 60.
+Main simrecon routine starts around line 69.
 
 ### File IO
 
 Files are opened using IVE Library starting around line 150 to line 350
 
-Optionally can use .tif reader.
+Optionally can use .tif reader. To use tiff reader need to set following preprocessor directive 
+
+```
+__SIRECON_USE_TIFF__
+```
 
 ### Threads
 
