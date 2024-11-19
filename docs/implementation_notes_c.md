@@ -1,19 +1,5 @@
 # 3D SIM algorithm and simrecon.c implementation notes
 
-## definitions
-
-**directions**: Number of illumination pattern directions.  Usually 3.
-
-**phase**: Number of phases for each direction.  Usually 5.
-
-**order**: The separated bands.  Usually 3.
-
-**angle**: The angle of the pattern vector in frequency space. 
-
-**magnitude**:  The length of the pattern vector in frequency space, inverse of the spacing of the pattern
-
-**amplitude**:  (Todo: clarify wording) The modulation depth of the pattern. 
-
 ## Summary of code
 
 All processing code is in a single file simrecon.c.
