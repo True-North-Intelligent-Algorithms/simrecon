@@ -4,11 +4,11 @@
 
 All processing code is in a single file simrecon.c.
 
-Main simrecon routine starts around line 69.
+Main simrecon routine starts around [line 69](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L69).
 
 ### File IO
 
-Files are opened using IVE Library starting around line 150 to line 350
+Files are opened using IVE Library starting around [line 150 to line 350](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L150)
 
 Optionally can use .tif reader. To use tiff reader need to set following preprocessor directive 
 
@@ -18,23 +18,27 @@ __SIRECON_USE_TIFF__
 
 ### Threads
 
-Number of threads to use is a parmeter and set at line 370
+Number of threads to use is a parmeter and set at [line 370](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L370)
 
 ### Memory allocation and FFT setup
 
-This is done from line 380 to about line 500.
+This is done from [line 380 to about line 500](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L380).
 
 ### Main processing loop
 
-begins at about line 522
+begins at about [line 522](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L522)
 
 ### drift detection
 
-done at line 550 to about 600
+done at [line 550 to about 600](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L550)
 
 ### makematrix
 
 Generates the matrix that is used to separate the raw data into the different bands of the sample information.
+
+### Load image flatfield and apodize
+
+These steps are done at about 
 
 ### Parameter estimation
 
