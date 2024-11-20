@@ -291,17 +291,86 @@ filterbands(direction, bands, k0, ndirs, norders, otf, dxy, dz,
                                fftplan, myParams.zoomfact, myParams.z_zoom, myParams.explodefact, myParams.bNoOrder0);
 ```
 
-### filterbands
+#### filterbands
 
 Prepares the bands to be assembled:  Applies appropriate OTF-based weighting in the overlaps, uses a Wiener like filter.
 
-- called for each direction
+Called for each direction works as follow
 
-### assemblereadspacebands
+There is an outer loop that is used to calculate the weights for current direction and order
+
+1.  Loop through all orders [line 2172](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L2172)
+2.  Loop through all y and x and calculate radial distance of coordinate from center
+3.  Check if radial distance below cut-off (search for ```if (rdist1<=rdistcutoff)```)
+4.  Loop through z
+5.  Get otf weight at current x, y, z, apply damping
+
+Search for following code to find the correction location or 
+
+```
+weight *= dampfact;
+sumweight=weight;
+```
+
+Inner loop calculates the weights of other orders and directions as to mix the overlapping regions properly
+
+7.  Loop through all orders [line 2232](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L2232)
+8.  Calculate x and y coordinates rel to shifted to center of direction and order
+9.  Check if the relative coordinate of the other direction and order is in the passband (if (rdist2<rdistcutoff)
+10. Get orf weight at 'other' band x, y, z apply damping
+11. Add to sumweight. 
+
+Search for following code to find correct location
+
+```
+ sumweight += weight;
+```
+
+Finally add Wiener value to sumweight and compute scale as follows
+
+```
+sumweight += wiener;
+scale = dampfact * conjf(otf1) / sumweight;
+````
+
+Next perform apodization.  Finally the below code applies the scale calculated above to the frequency coefficient.  (It is a bit tricky for band 1 and 2 because of complex number considerations).
+
+Search for following code
+
+```
+if (order == 0) {
+              if (!conj)
+                bandptr[ind] *= scale;
+              else
+                printf("error: order=0 and conj\n");
+            }
+            else {
+                scale *= conjamp[order]; /* not invamp: the 1/|amp| factor is */
+                /*  taken care of by including ampmag2 in the weights */
+                bandreval = bandptr[ind];
+                bandimval = bandptr2[ind];
+                if (conj) {
+                  bandreval = conjf(bandreval);
+                  bandimval = conjf(bandimval);
+                }
+                bandplusval  = bandreval + I * bandimval;  /* bandplus = bandre + i bandim */
+//                bandminusval = bandreval - I * bandimval;  /* bandminus = bandre - i bandim */
+
+                bandplusval *= scale;   /* scale only the bandplus part - bandminus will take care */
+                /* of itself because of symmetry (?) */
+
+                iout = (y1+ny)%ny;
+                jout = (x1+nx)%nx;
+                zout = (z0+nz)%nz;
+                tempbandplus[zout*nxy+iout*nx+jout] = bandplusval;
+
+```
+
+#### assemblereadspacebands
 
 Assembles bands in real space.  Calls move.  ```assemblerealspacebands``` is called once for each direction. 
 
-#### move(...)
+#### move
 
 Moves the contents of the complex fourier space array of size ```(nx/2+1)*ny``` to a bigger array of size ```(zoomfact*nx)*(zoomfact*ny)```.  In most cases ```zoomfact``` is 2. 
 - called for each direction
