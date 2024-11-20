@@ -1,5 +1,7 @@
 # 3D SIM algorithm and simrecon.c implementation notes
 
+This document describes the ```sirecon.c``` file which implements the algorithm described in [Three-Dimensional Resolution Doubling in Wide-Field Fluorescence Microscopy by Structured Illumination](https://pmc.ncbi.nlm.nih.gov/articles/PMC2397368/pdf/4957.pdf), Gustafsson, Shao, etc. al. 
+
 ## Summary of code
 
 All processing code is in a single file simrecon.c.
@@ -34,7 +36,13 @@ done at [line 550 to about 600](https://github.com/True-North-Intelligent-Algori
 
 ### makematrix
 
-Generates the matrix that is used to separate the raw data into the different bands of the sample information.
+Generates the matrix that is used to separate the raw data into the different bands of the sample information, done at [about line 465](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L464).  Figure 2 in [Gustafson, Lin, etc. al](https://pmc.ncbi.nlm.nih.gov/articles/PMC2397368/pdf/4957.pdf) show the concept. 
+
+![](./figures/figure2_separate.jpg)
+
+```
+ makematrix(nphases, norders, 0, 0, sepMatrix, noiseVarFactors);
+```
 
 ### Load image flatfield and apodize
 
