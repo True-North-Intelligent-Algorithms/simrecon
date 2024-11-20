@@ -10,6 +10,9 @@
 
 **magnitude**:  The length of the pattern vector in frequency space, inverse of the spacing of the pattern
 
-**amplitude**:  (Todo: clarify wording) The modulation depth of the pattern. 
+**amplitude**:  (Todo: clarify wording) The modulation depth of the pattern.  
+  
+**k0**: Modulation wave vector  
+
 
 
