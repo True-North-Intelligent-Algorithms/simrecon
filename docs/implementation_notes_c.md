@@ -221,6 +221,76 @@ At the very end the percent off expected value is printed to the text file/termi
 best fit for k0 is 6.917648 percent off expected value.
 ```
 
+### Force and constrain amplitudes
+
+The amplitudes seem to be the more unstable than angle and magnitude, thus sometimes (especially if ```filteroverlaps``` is false) it makes sense to define these explicityly.  The code which sets amplitudes explicitly and the code the applies constraints to the amplitudes starts at around [line 890]()(https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/src/sirecon.c#L1890)   
+
+search for the following code snippet
+
+```
+       if (myParams.forceamp[1] > 0.0)   /* force modamp's amplitude to be a value user provided (ideally should be 1)  */
+          for (order=1;order<norders;order++) {
+            float a = cabsf(amp[direction][order]);
+            // BN commenting out this if statement to allow higher a factors
+            //if (a<myParams.forceamp[order]) {
+              ampfact = myParams.forceamp[order]/a;
+              amp[direction][order] *= ampfact;
+              printf("modamp mag=%f, phase=%f  \n",cabsf(amp[direction][order]),
+                     cargf(amp[direction][order]));
+            //}
+          }
+
+        // BN: Here we constrain amp to be between ampmin and ampmax, and check if amp is nan or infinite
+        // (this is helpful as a constraint for tiled reconstructions where sometimes a tile has an unrealistic amp)
+        if (myParams.ampmin[1] > 0.0)   /* force modamp's amplitude to be above ampmin  */
+          for (order=1;order<norders;order++) {
+            float a = cabsf(amp[direction][order]);
+
+            if ( isnan(a) || !isfinite(a)) {
+              amp[direction][order] = 1.0 + 0*I;
+            }
+            else if (a<myParams.ampmin[order]) {
+              ampfact = myParams.ampmin[order]/a;
+              amp[direction][order] *= ampfact;
+              printf("modamp mag=%f, phase=%f  \n",cabsf(amp[direction][order]),
+                     cargf(amp[direction][order]));
+            }
+          }
+
+        if (myParams.ampmax[1] > 0.0)   /* force modamp's amplitude to be below ampmax  */
+          for (order=1;order<norders;order++) {
+            float a = cabsf(amp[direction][order]);
+
+            if ( isnan(a) || !isfinite(a)) {
+              amp[direction][order] = 1.0 + 0*I;
+            }
+            else if (a>myParams.ampmax[order]) {
+              ampfact = myParams.ampmax[order]/a;
+              amp[direction][order] *= ampfact;
+              printf("modamp mag=%f, phase=%f  \n",cabsf(amp[direction][order]),
+                     cargf(amp[direction][order]));
+            }
+          }
+```
+
+### Filter and assemble bands
+
+See Gustafsson, Shao, et al, Methods Section, Reconstruction Section, for full explanation and equation (11).  Essentially the different frequency components are combined through a generalized Wiener filter with an Apodization term.  Each component is the OTF weighted sum of all bands at that frequency (bands overlap in frequency space) weighted by a normalization term composed of the OTF weights at each band.  An apodization term is also applied.  
+
+Eq. 11 is implemented in a non-intuitive way.  Each unshifted component is weighted individually, padded, and transformed to real space then multiplied by the complex phase gradient which represents the frequency space shift.   
+
+The first part is done in ```filterbands``` and the second in ```assemblereadspacebands````. 
+
+```
+filterbands(direction, bands, k0, ndirs, norders, otf, dxy, dz,
+                    amp, noiseVarFactors, nx, ny, nz0, wave[iw], &myParams);
+
+        /* FFT back to real space and assemble */
+        printf("before assemblerealspacebands\n");
+        assemblerealspacebands(direction, outbuffer, bigbuffer, bands, ndirs, norders, k0, dxy, nx, ny, nz0,
+                               fftplan, myParams.zoomfact, myParams.z_zoom, myParams.explodefact, myParams.bNoOrder0);
+```
+
 ### filterbands
 
 Prepares the bands to be assembled:  Applies appropriate OTF-based weighting in the overlaps, uses a Wiener like filter.
