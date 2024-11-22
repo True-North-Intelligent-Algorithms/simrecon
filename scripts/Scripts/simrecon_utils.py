@@ -790,9 +790,11 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         how many total sections after zero padding (this hasn't been implemented properly)
     explodefact: float
         factor by which to exaggerate the order shifts for display
-    nofilteroverlaps: bool (default True)
+    nofilteroverlaps: bool (default False)
         (Used with explodefact) leave orders round
         (no filtering the overlapped regions)
+    keeporder2: bool (default False)
+        (keep order 2 coefficients in the output)
     nosuppress: bool
         do not want to suppress singularity at OTF origins
     suppressR: float (default is 10)
@@ -901,6 +903,7 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'zpadto',
         'explodefact',
         'nofilteroverlaps',
+        'keeporder2',
         'nosuppress',
         'suppressR',
         'dampenOrder0',
@@ -958,6 +961,7 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         'zpadto': int,
         'explodefact': float,
         'nofilteroverlaps': bool,
+        'keeporder2': bool,
         'nosuppress': bool,
         'suppressR': numeric,
         'dampenOrder0': bool,
@@ -1123,7 +1127,8 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
             else:
                 logger.debug(" ".join(exc_list))
 
-            output_list = return_code.stdout.decode('utf-8').split('\n')
+            output_list_reprocess = return_code.stdout.decode('utf-8').split('\n')
+    
     return output_list
 
 
@@ -1513,7 +1518,7 @@ def combine_img_with_padding_window(recon_split_data, padding, window_func=cosin
     return to_combine_data[..., slc, slc]
 
 
-def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimate=None, window_func=cosine_edge, tile_data = None, tile_limits = None):
+def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimate=None, window_func=cosine_edge, tile_limits = None):
     '''
     Method that splits then processes and then recombines images
 
@@ -1726,6 +1731,8 @@ def plot_params(data_dict, dpi=150, axes_pad=0.1, figsize=(9,15), cbar_size="5%"
     for row, key, cbar in zip(grid.axes_row, keys, grid.cbar_axes):
         # pull data
         data = data_dict[key]
+
+        data = data.astype('float32')
         
         if key == "mag":
             # flip to line spacing

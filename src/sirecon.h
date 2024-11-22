@@ -96,6 +96,8 @@ typedef struct {
   int   bSaveOverlaps; /* whether to save makeoverlaps() output into a file */
   char  fileOverlaps[200];
 
+  int bKeepOrder2;
+  
   /* performance related parameters */
   int  nthreads;  /* number of threads to use */
 } ReconParams;

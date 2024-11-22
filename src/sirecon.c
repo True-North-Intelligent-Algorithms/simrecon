@@ -2161,6 +2161,7 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
   suppRadius = pParams->suppression_radius*min_dkr;
 
   for (order=0;order<norders;order++) {
+
     if (order==0) bandptr = bands[0];
     else {
       bandptr = bands[2*order-1];     /* bands contains only the data of one direction -- dir*/
@@ -2173,7 +2174,7 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
     for (y1=-(ycent-1);y1<=ycent;y1++) { /* (integer) coords of an imagined full four-quadrant array of the band to be filtered, */
       float weight, sumweight, amp2mag2, rdist1, rdist2;
       fftwf_complex bandreval, bandimval, bandplusval, otf1, otf2, scale;
-      float xabs, yabs, x2, y2, kx2, ky2, rdistabs, dampfact, apofact=1.;
+      float xabs, yabs, x2, y2, kx2, ky2, rdistabs, dampfact, apofact=1., ampfact1=1.0, ampfact2=1.0;
       int order2, dir2, iin, jin, conj, xyind, ind, z0, iz, z;
       int iout, jout, zout; // for tempbandplus indexing
 
@@ -2203,6 +2204,7 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
           rdistabs = sqrt(xabs*xabs + yabs*yabs);  // used later for apodization calculation
           for (z0=-zdistcutoff[order];z0<=zdistcutoff[order];z0++) {
             otf1 = otfinterpolate(OTF[order], x1f, y1f, z0, kzscale, pParams);
+            ampfact1 = 1.0;
             weight = mag2(otf1);
 
             if (order!= 0) weight *= ampmag2[order];
@@ -2242,6 +2244,35 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
 
                 if (rdist2<rdistcutoff) {
                   otf2 = otfinterpolate(OTF[abs(order2)], x2, y2, z0, kzscale, pParams);
+                  ampfact2 = 1.0;
+                  // keep order 2 scheme
+                  if (pParams->bKeepOrder2 == 1) { 
+                    float delta1 = 0.00001;
+
+                    // if order is 0 and the overlap order is 2 then completely supress the order 0 coefficient
+                    // and we will use the order 2 coefficient
+                    if (order==0 && abs(order2)==2) {
+                      // only use just the order 2 coefficient if the magnitude of the overlap otf is greater than delta1
+                      if (mag2(otf2)>delta1) {
+                        ampfact1 = 0;
+                      }
+                    }
+                    // same logic for order 1 
+                    else if (order==1 && abs(order2)==2) {
+                      if (mag2(otf2)>delta1) {
+                        ampfact1 = 0;
+                      }
+                    }
+                    // if order is 2 and the overlap order is not 2 supress the weighting of the denominator because we want to keep the order 2 coefficient
+                    else if (order==2 && abs(order2) != 2) {
+                      //if (mag2(otf1)>delta1) {
+                        ampfact2 = 0;
+                      //} 
+                    }
+                  }
+                  
+                  otf2*=ampfact2;
+
                   weight = mag2(otf2) / noiseVarFactors[dir2*norders+abs(order2)];
                   if (order2 != 0) weight *= amp2mag2;
                   
@@ -2262,7 +2293,7 @@ void filterbands(int dir, fftwf_complex *bands[], vector k0[], int ndirs, int no
               }
             }
             sumweight += wiener;
-            scale = dampfact * conjf(otf1) / sumweight;
+            scale = ampfact1*dampfact * conjf(otf1) / sumweight;
 
             if (pParams->apodizeoutput) {
               float rho, zdistabs;

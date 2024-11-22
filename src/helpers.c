@@ -505,6 +505,11 @@ int commandline(int argc, char *argv[], ReconParams *myParams, char *ifiles, cha
       }
       ncomm += 2;
     }
+    else if (strcmp(argv[ncomm], "-keeporder2") == 0) {
+      myParams->bKeepOrder2 = 1;
+      ncomm ++;
+    }
+
 
 /*     else if (strcmp(argv[ncomm], "-skip") == 0) { */
 /*       if (!getinteger(argv[ncomm+1], skip_sec)) { */
@@ -617,6 +622,7 @@ void SetDefaultParams(ReconParams *pParams)
   pParams->fileOverlaps[0] = '\0';
 
   pParams->nthreads = -1;
+  pParams->bKeepOrder2 = 0;
 }
 
 void mrc_file_write(const float *buffer, int nx, int ny, int nz, float rlen, float zlen, int mode, int iwave, const char *files)
