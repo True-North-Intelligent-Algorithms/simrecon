@@ -1,15 +1,4 @@
-# Input parameters  
-
-Here's the output converted into Markdown, formatted to make it suitable for a GitHub or GitHub Pages website:
-
-```markdown
-# Usage
-
-```bash
-program_name [[input file] [output file] [OTF file]] [Options]
-```
-
-## Options
+## Input parameters  
 
 - **`-ndirs N`**  
   Number of directions in data (default is 3)
@@ -160,6 +149,12 @@ program_name [[input file] [output file] [OTF file]] [Options]
 
 - **`-saveoverlaps filename`**  
   Save overlaps from `makeoverlaps()` into a file
+
+- **`-nThreads`**  
+  Number of threads c-code will use (set to 1 if higher level (ie python with tiles) code will be threaded)
+
+- **`-keeporder2`**  
+  If set order 2 coefficients will be used in the order 2 passband instead of mixing with other orders
 
 - **`-help` or `-h`**  
   Print this help message

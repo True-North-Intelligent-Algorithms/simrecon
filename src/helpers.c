@@ -119,6 +119,9 @@ void Usage(char *argv[])
   printf("\t-saveprefiltered filename -- save separated bands into file\n");
   printf("\t-savealignedraw filename -- save drift-corrected raw images into file\n");
   printf("\t-saveoverlaps filename -- save overlaps by makeoverlaps() into file\n");
+  printf("\t-nthreads x -- number of threads to use\n");
+  printf("\t-makemodel -- make a model data set\n");
+  printf("\t-keeporder2 -- keep order 2 in the final reconstruction\n");  
   printf("\t-help or -h -- print this message\n");
 }
 
