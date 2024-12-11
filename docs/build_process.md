@@ -1,4 +1,4 @@
-## Build Process  
+## C code Build Process  
 
 The build uses CMake. The CMake file is [here](../src/CMakeLists.txt).  
 
