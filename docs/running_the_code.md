@@ -2,9 +2,11 @@
 
 1.  Install a flavor of Conda (be careful of licensing, may want to look into miniconda or miniforge)
 
-2.  Create an environment from the ```requirement.txt```
+2.  Create an environment from the ```requirements.txt``` file at the top level of this repo. 
 
-$ conda create --name simrecon_environment --file requirements.txt
+```
+conda create --name simrecon_environment --file requirements.txt
+```
 
 3.  Get the c executable (```simrecon.exe```) and dependencies
 
