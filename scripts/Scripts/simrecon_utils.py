@@ -873,7 +873,7 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
 
     # the list to pass to subprocess.call, this is just the beginning
     # execute in powershell
-    exc_list = [r'C:\Users\bnort\work\Janelia\code\simrecon\build\sirecon', input_file, output_file, otf_file]
+    exc_list = [r'C:\Users\Cryo SIM-PALM\code\simrecon\build\sirecon', input_file, output_file, otf_file]
     
     # insert default values into **kwargs here
     valid_kwargs = OrderedDict.fromkeys((
@@ -1041,7 +1041,8 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
     
     tile_limits = kwargs.get('tile_limits', None)
 
-    if tile_limits is not None:    
+    if tile_limits is not None: 
+          
         temp = [line for line in output_list if line.strip()]
     
         for i in range(len(temp)):
@@ -1049,6 +1050,7 @@ def simrecon(*, input_file, output_file, otf_file, **kwargs):
         
     
         temp1="\n".join(temp)
+        
         tile_data = process_txt_output(temp1)
 
         spacing_min = tile_limits['spacing_min']
@@ -1525,7 +1527,9 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
     Returns
     -------
     total_save_path, sirecon_ouput
+
     '''
+    
     assert tile_size >= padding, "Tile size must be smaller than padding"
     # make copy so internals don't change.
     sim_kwargs = sim_kwargs.copy()
@@ -1537,6 +1541,7 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
     zoom = int(zoom)
     # open old Mrc
     oldmrc = Mrc.Mrc(fullpath)
+   
     # pull data
     old_data = oldmrc.data
     # generate hex hash, will use as ID
@@ -1553,12 +1558,13 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
     #dask.config.set(scheduler='single-threaded')
 
     # make temp directory to work in
-    with tempfile.TemporaryDirectory(dir="D:/") as dir_name:
+    with tempfile.TemporaryDirectory(dir="F:/") as dir_name:
         # save split data
         sirecon_ouput = []
         
         @dask.delayed
         def save_process(data, savepath, sim_kwargs):
+            
             Mrc.save(data, savepath, hdr=oldmrc.hdr, ifExists='overwrite')
             return simrecon(**sim_kwargs)
         
@@ -1584,7 +1590,7 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
                 sim_kwargs['background'] = float(bgs[i])
 
             sirecon_ouput.append(save_process(data, savepath, sim_kwargs))
-
+        
         with ProgressBar():
             # process files
             sirecon_ouput = list(itt.chain.from_iterable(dask.delayed(sirecon_ouput).compute()))
@@ -1649,7 +1655,7 @@ def split_process_recombine(fullpath, tile_size, padding, sim_kwargs, bg_estimat
             print('problem with temp mrc object access')
 
         del oldmrc
-        del temp_mrc
+        #del temp_mrc
                                  # temp directory is killed automatically due to with statement.
    
     
