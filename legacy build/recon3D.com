@@ -1,0 +1,1 @@
+./sirecon /Users/shaol/SIMrecon/testdata/Hela.tubule.102504.02.dat ./Hela.proc1 /Users/shaol/SIMrecon/testdata/otf400x72 -angle0  0.3824 -ls 0.1823 -ndirs 3 -nphases 5 -zoomfact 2 -triangleapo -na 1.36 -nimm 1.5128 -usecorr /Users/shaol/SIMrecon/testdata/400x400.050904.CAL -wiener 0.01 -driftfix -fixphasestep
