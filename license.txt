@@ -1,10 +1,8 @@
 The Python wrapper consists of the following folders
 
-```
-python 
-scripts 
-notebooks 
-```
+./python 
+./scripts 
+./notebooks 
 
 This Python wrapper is dual-licensed under the MIT License and the GNU General Public License (GPL) version 3.
 
@@ -12,11 +10,8 @@ When used in conjunction with the GPL-licensed `src` code, this wrapper is subje
 
 If the `src` code is replaced with code under a more permissive license, this wrapper may be used under the terms of the MIT License.
 
-
 The c code consists of the following folders
 
-```
-src
-```
+./src
 
 The c-code, originally written by Lin Shao is licensed under GPL
