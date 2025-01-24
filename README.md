@@ -6,7 +6,7 @@ This code base is a derivative of Mats Gustafsson & Lin Shao's 3-beam SIM recons
 
 The algorithm as described in [Gustafsson et al (2008) Biophys. J. 94(12): 4957–4970. doi: 10.1529/biophysj.107.120345](https://pmc.ncbi.nlm.nih.gov/articles/PMC2397368/)
 
-There is also a sophisticated Python wrapper, written by [David Hoffman](https://github.com/david-hoffman) which implements a tiled version of simrecon.
+We also derive from  a Python wrapper, written by [David Hoffman](https://github.com/david-hoffman) which implements a tiled version of simrecon.
 
 James Seyforth and Brian Northan also made the following contributions
 
