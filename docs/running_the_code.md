@@ -14,6 +14,8 @@ These can be found at the top level of the code repository in the ```bin``` fold
 
 Or see [here](https://github.com/True-North-Intelligent-Algorithms/simrecon/tree/main/bin)
 
+Note.  The dependency .dlls for sirecon.exe are all in the ```bin``` folder, so if you move ```sirecon.exe``` to a different location, move dependencies as well. 
+
 4.  Point ```simrecon_utils``` to the location of the executable.    
 
 Currently the location of the executable needs is manually set in the file around line 876.  See [here](https://github.com/True-North-Intelligent-Algorithms/simrecon/blob/main/scripts/Scripts/simrecon_utils.py#L876).
