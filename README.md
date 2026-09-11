@@ -14,17 +14,19 @@ We also derive from  a Python wrapper, written by [David Hoffman](https://github
 
 James Seyforth and Brian Northan also made the following contributions
 
-1.  Organized code into one project, added CMake support and added to github repo. 
-2.  Better documentation of code organization and build process.
-3.  More sophisticated threading to avoid thread resource contention. 
-4.  Misc. fixes for some crash scenarios (long file names)
-5.  Added a number of notebooks to analyze and troubleshoot results and PSF. 
-6.  Added a notebook that uses Napari to visualize results and parameters at each tile location. 
-7.  Added constraints to tiled reconstruction to handle occasional invalid results at a tile (this allowed us to experiment with smaller tiles).
-8.  Added keeporder2 mode (more emphasis on order2 information) and ran several tests with 'nofilteroverlaps' mode. 
-9.  Added new notebooks and scripts for processing. 
-10. Established Gold standard image sets and showed a comparison to the original sim recon implementation at Janelia. 
-11. Documented in a presentation the experiments and parameters that were tested for purposes of sharing with the community.
+1. Organized code into one project, added CMake support and added to github repo.
+2. Better documentation of code organization and build process.
+3. Ran several tests with nofilteroverlaps = True, which we concluded was useful for reducing artifacts. We hypothesise this is because it is difficult to acquire a perfectly accurate PSF, and even small inaccuracies in the PSF can cause artifacts when filtering overlaps in the full SIM 3D algorithm.  
+4. Documented in a presentation the experiments and parameters that were tested for purposes of sharing with the community. Find it here: Simrecon data
+5. Also added experimental keeporder2 mode (more emphasis on order2 information) but not found as useful as 'nofilteroverlaps =True' flag.
+6. New notebook solved simrecon.exe failing to process larger than ~3.6 Gb tiff files by chunking larger files into sub-stacks.
+7. More sophisticated threading to avoid thread resource contention.
+8. Misc. fixes for some crash scenarios (long file names)
+9. Added a number of notebooks to analyze and troubleshoot general results and the PSF.
+10. Added a notebook that uses Napari to visualize results and parameters at each tile location.
+11. Added constraints to tiled reconstruction to handle occasional invalid results at a tile (this allowed us to experiment with smaller tiles).
+12. Added new notebooks and scripts for processing.
+13. Established Gold standard image sets and showed a comparison to the original sim recon implementation at Janelia.
 
 Build instructions for Windows
 
